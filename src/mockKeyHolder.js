@@ -6,23 +6,37 @@ const path = require('path');
 const keysStorage = {};
 
 // Function to simulate storing a key
-function storeKey(hospitalId, privateKey) {
+function storeKey(id, privateKey) {
     // For additional realism, you could encrypt the privateKey here using a passphrase
      // Simulated encryption
-    keysStorage[hospitalId] = encryptKey(privateKey, 'passphrase');
+    keysStorage[id] = encryptKey(privateKey, 'passphrase');
 
     // Optionally, persist keys to a file for demonstration
     fs.writeFileSync(path.join(__dirname, 'keysStorage.json'), JSON.stringify(keysStorage, null, 2));
 }
 
 // Function to simulate retrieving a key
-function retrieveKey(hospitalId) {
+function retrieveKey(id) {
     // Simulating decryption of the key
-    const encryptedKey = keysStorage[hospitalId] || null;
+    const encryptedKey = keysStorage[id] || null;
     if (!encryptedKey) {
-        throw new Error(`Key for hospitalId ${hospitalId} not found.`);
+        throw new Error(`Key for ${id} not found.`);
     }
     return decryptKey(encryptedKey, 'passphrase'); // Simulated decryption
+}
+
+//function to simulate removing a key
+function removeKey(accountId){
+    try{
+        if(!keysStorage[accountId]){
+            throw new Error(`Key for accountId ${accountId} not found.`);
+        }
+    }catch(err){
+        console.log(err);
+    }
+    delete keysStorage[accountId];
+    fs.writeFileSync(path.join(__dirname, 'keysStorage.json'), JSON.stringify(keysStorage, null, 2));
+    return true;
 }
 
 // Mock encryption function
@@ -37,4 +51,4 @@ function decryptKey(encryptedKey, passphrase) {
     return encryptedKey.replace('encrypted-', '');
 }
 
-module.exports = { storeKey, retrieveKey };
+module.exports = { storeKey, retrieveKey, removeKey };

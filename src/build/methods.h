@@ -1,0 +1,2 @@
+DEFINE_NEAR_METHOD(init)
+DEFINE_NEAR_METHOD(query_hospital_model_url)

@@ -11,7 +11,7 @@
 }
 
 .dashboard-logo {
-    width: 50px; /* Adjust based on your actual logo size */
+    width: 80px; /* Adjust based on your actual logo size */
 }
 
 .dashboard-nav a {
@@ -23,7 +23,11 @@
 
 .signup-btn {
     font-weight: bold;
-    color: #1a73e8; /* Or any other color that matches your design */
+    color: #002147; /* Or any other color that matches your design */
+}
+.dashboard-signin-btn{
+    font-weight: bold;
+    color: #002147; /* Or any other color that matches your design */
 }
 
 .dashboard-main {
@@ -34,7 +38,9 @@
 .dashboard-background {
     width: 100%;
     height: auto;
+    opacity: 0.5;
 }
+
 
 .dashboard-content {
     position: absolute;
@@ -50,7 +56,7 @@
 
 .dashboard-subtitle {
     font-size: 1.5rem;
-    color: #ffffff;
+    color: #002147;
     margin-bottom: 1rem;
 }
 
@@ -72,7 +78,12 @@
     background-color: #f3f3f3; /* Or any other color that matches your design */
 }
 
-.dashboard-made-with img, .dashboard-supported-by img {
-    height: 20px; /* Adjust based on your actual image size */
+.dashboard-made-with img {
+    height: 50px; /* Adjust based on your actual image size */
+    vertical-align: middle;
+}
+
+.dashboard-supported-by img {
+    height: 125px; /* Adjust based on your actual image size */
     vertical-align: middle;
 }

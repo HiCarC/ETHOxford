@@ -1,0 +1,125 @@
+.diagnosis {
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #fff;
+}
+
+.diagnosis-header, .diagnosis-footer {
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.diagnosis-main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.diagnosis-title {
+    margin: 0;
+    color: #002147;
+    font-size: 2.5rem;
+}
+
+.diagnosis-progress {
+    /* Add styles for your progress indicator */
+}
+
+.diagnosis-content {
+    width: 100%;
+    max-width: 600px; /* Or your preferred max width */
+    margin: 1rem 0;
+    background-color: #f0f0f0; /* Background color for the content area */
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.diagnosis-content label {
+    display: block;
+    margin-top: 1rem;
+}
+
+.diagnosis-content input[type="range"] {
+    width: 100%;
+    margin: 10px 0;
+}
+
+.diagnosis-buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 20px;
+}
+
+.back-button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    color: #fff;
+    background-color: #0b274d; /* Button background color */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.next-button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    color: #fff;
+    background-color: #3c8a34; /* Button background color */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.diagnosis-logo {
+    width: 50px; /* Adjust based on actual logo size */
+}
+
+.diagnosis-nav a, .sign-out-btn {
+    color: #002147;
+    text-decoration: none;
+    margin: 0 10px;
+    font-weight: 500;
+}
+
+.diagnosis-footer {
+    background-color: #f3f3f3;
+}
+
+.dashboard-made-with img {
+    height: 50px; /* Adjust based on your actual image size */
+
+    vertical-align: middle;
+}
+
+.dashboard-supported-by img {
+    height: 5000px; /* Adjust based on your actual image size */
+    width: 10000px;
+    vertical-align: middle;
+}
+.diagnosis-slider {
+    margin: 1rem 0;
+}
+
+.range-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.range-container label {
+    margin-bottom: 5px;
+}
+
+.range-container input[type="range"] {
+    width: calc(100% - 30px); /* width minus space for min/max values */
+    margin: 0 15px; /* gives space for min/max values */
+}

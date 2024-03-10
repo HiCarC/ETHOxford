@@ -13,18 +13,9 @@ const CompleteRegistration = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [firstName, setFirstName] = useState(firstNameQuery || '');
     const [lastName, setLastName] = useState(lastNameQuery || '');
-    const [dateOfBirth, setDateOfBirth] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        if (password !== confirmPassword) {
-            alert("Passwords do not match!");
-            return;
-        }
-
         try {
             const response = await fetch('http://localhost:3001/complete-register', {
                 method: 'POST',
@@ -35,8 +26,6 @@ const CompleteRegistration = () => {
                     email,
                     firstName,
                     lastName,
-                    dateOfBirth,
-                    password,
                     hospital_id
                 }),
             });
@@ -75,30 +64,6 @@ const CompleteRegistration = () => {
                             value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
                         />
-                        <label>Date of Birth</label>
-                        <input
-                            type="date"
-                            value={dateOfBirth}
-                            onChange={(e) => setDateOfBirth(e.target.value)}
-                        />
-                        <button type="button" onClick={() => setCurrentPage(2)}>Next</button>
-                    </>
-                )}
-                {currentPage === 2 && (
-                    <>
-                        <label>Password</label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-                        <label>Confirm Password</label>
-                        <input
-                            type="password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                        />
-                        <button type="button" onClick={() => setCurrentPage(1)}>Back</button>
                         <button type="submit">Register</button>
                     </>
                 )}

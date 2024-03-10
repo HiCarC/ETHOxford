@@ -1,0 +1,46 @@
+.diagnosis-main {
+    /* Your existing styles */
+}
+
+.diagnosis-output, .diagnosis-recommendations {
+    margin-bottom: 20px;
+}
+
+.diagnosis-output textarea, .diagnosis-recommendations textarea {
+    width: 100%;
+    height: 100px; /* Adjust the height as needed */
+    margin-bottom: 10px;
+    padding: 10px;
+    resize: none; /* Prevents resizing of the textarea */
+    border: 1px solid #ccc; /* Style as needed */
+    background-color: #f8f8f8; /* Light grey background */
+}
+
+.de-doctor-llm {
+    margin-bottom: 20px;
+}
+
+.de-doctor-llm input {
+    width: calc(100% - 120px);
+    padding: 10px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+}
+
+.de-doctor-llm button {
+    padding: 10px;
+    background-color: #0044cc;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+.finish-button {
+    padding: 10px 20px;
+    background-color: #4CAF50; /* Green background for a finish button */
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+/* Add additional styles as needed to match your design */
