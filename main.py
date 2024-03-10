@@ -51,7 +51,13 @@ def predict(data: dict):
     # Effectuez la prédiction avec votre modèle PyTorch
     with torch.no_grad():
         prediction = votre_modele(input_data).item()
-
+    
     response = "Yes" if prediction > 0.5 else "No"
+
+    if response == "Yes": 
+        return "I am sorry to anounce you that you might have cancer diseace"
+    
+    else: 
+        return "You are in great shape. STAY HARD"
 
     return {"prediction": {response, prediction}}
