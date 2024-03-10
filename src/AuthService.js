@@ -3,7 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const crypto = require('crypto');
-const {KeyPair} = require("near-api-js");
+const {KeyPair, connect, utils, keyStores} = require("near-api-js");
 const nodemailer = require('nodemailer');
 const { v4: uuidv4 } = require('uuid');
 const { storeKey, retrieveKey } = require('./mockKeyHolder');
@@ -12,7 +12,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Example: Storing a key for a hospital
-storeKey('hospital-123', 'private-key-for-hospital-123');
+storeKey('dedoctorhospital1', 'ed25519:5smpnjAu1b5Ap9mNa2ZdacEJRaTDLEXy21NDQpNMRXqhmAVKiyD2nYQP1TwPBdH6o67kqPq5vcDv4xTEZ2nHwx2j');
 // Encrypts the private key using the user's password and a salt
 function encryptPrivateKey(privateKey, password) {
     const salt = crypto.randomBytes(16);
@@ -40,14 +40,13 @@ const nearConfig = {
 // Utility function to convert a private key string into a KeyPair object
 const getKeyPairFromPrivate = (privateKey) => KeyPair.fromString(privateKey);
 
-app.post('/create-patient-account', async (req, res) => {
-    const { patientId, hospitalId } = req.body;
+async function createNearAccount(patientId, hospitalId) {
 
     try {
         // Use the mock key holder to fetch the hospital's master private key
-        const masterPrivateKey = await retrieveKey(hospitalId);
+        const [masterPrivateKey] = await Promise.all([retrieveKey(hospitalId)]);
         if (!masterPrivateKey) {
-            return res.status(404).json({ error: "Hospital master account not found." });
+            throw new Error("Hospital master account not found.");
         }
 
         const near = await connect({
@@ -55,8 +54,12 @@ app.post('/create-patient-account', async (req, res) => {
             nodeUrl: nearConfig.nodeUrl,
             walletUrl: nearConfig.walletUrl,
             helperUrl: nearConfig.helperUrl,
-            keyStore: new utils.keyStores.InMemoryKeyStore(),
+            keyStore: new keyStores.InMemoryKeyStore(),
         });
+
+        const keyBuffer = Buffer.from(masterPrivateKey, 'base64');
+
+        console.log("Key Length:", keyBuffer.length); // Should output 64 for a valid ED25519 key
 
         const masterKeyPair = getKeyPairFromPrivate(masterPrivateKey);
         const masterAccountId = `${hospitalId}.${nearConfig.networkId}`;
@@ -70,32 +73,35 @@ app.post('/create-patient-account', async (req, res) => {
 
         // Create the new account with an initial balance
         await masterAccount.createAccount(
-            newAccountId,
+            newAccountId.toLowerCase(),
             newAccountKeyPair.publicKey,
-            utils.format.parseNearAmount("10") // Example balance
+            utils.format.parseNearAmount("0.1") // Example balance
         );
 
         console.log(`Successfully created account: ${newAccountId}`);
-        res.json({ success: true, accountId: newAccountId, publicKey: newAccountKeyPair.publicKey.toString() });
+        return({ accountId: newAccountId, publicKey: newAccountKeyPair.publicKey.toString() });
     } catch (error) {
         console.error(`Failed to create account for ${patientId} with master account ${hospitalId}:`, error);
-        res.status(500).json({ success: false, message: 'Failed to create patient account.' });
+        throw error;
     }
-});
+};
 
 // Assuming usersDb is defined somewhere accessible
 let usersDb = {};
 
 const transporter = nodemailer.createTransport({
-    host: "mailhog",
-    port: 1025,
+    host: "smtp.gmail.com",
+    port: 587,
     secure: false, // true for 465, false for other ports. Most local SMTP servers use non-secure connections
-    // No need for auth object since most local SMTP servers don't require authentication
+    auth : {
+        user: "dedoctoreth@gmail.com",
+        pass: "seyl yanl cdnm wzgh"
+    }
 });
 
 const sendRegistrationEmail = async (email, registrationLink) => {
     await transporter.sendMail({
-        from: `"Hospital Registration" <"registration@hospital.com">`,
+        from: "Hospital Registration <registration@hospital.com>",
         to: email,
         subject: "Complete Your Registration",
         html: `Please click on the link to complete your registration: <a href="${registrationLink}">Complete Registration</a>`,
@@ -118,8 +124,8 @@ app.post('/register-patient', async (req, res) => {
 });
 
 app.post('/complete-register', async (req, res) => {
-    const { firstName, lastName, email, password } = req.body;
-    const userId = `${firstName[0]}${lastName}${uuidv4()}`; // Simplified for uniqueness and readability
+    const { firstName, lastName, email, password, hospital_id} = req.body;
+    const userId = `${firstName[0]}${lastName[0]}${uuidv4().split('-')[0]}`; // Simplified for uniqueness and readability
 
     try {
         const { accountId, keyPair } = await createNearAccount(userId, hospital_id);

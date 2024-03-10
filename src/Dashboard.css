@@ -1,0 +1,78 @@
+.dashboard {
+    font-family: 'Inter', sans-serif;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    color: #002147;
+}
+
+.dashboard-logo {
+    width: 50px; /* Adjust based on your actual logo size */
+}
+
+.dashboard-nav a {
+    text-decoration: none;
+    margin-right: 1rem;
+    color: #000;
+    font-weight: 500;
+}
+
+.signup-btn {
+    font-weight: bold;
+    color: #1a73e8; /* Or any other color that matches your design */
+}
+
+.dashboard-main {
+    position: relative;
+    text-align: center;
+}
+
+.dashboard-background {
+    width: 100%;
+    height: auto;
+}
+
+.dashboard-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.dashboard-title {
+    font-size: 2.5rem;
+    color: #002147;
+}
+
+.dashboard-subtitle {
+    font-size: 1.5rem;
+    color: #ffffff;
+    margin-bottom: 1rem;
+}
+
+.dashboard-signin-btn {
+    background-color: #1a73e8;
+    color:#002147;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.dashboard-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: #f3f3f3; /* Or any other color that matches your design */
+}
+
+.dashboard-made-with img, .dashboard-supported-by img {
+    height: 20px; /* Adjust based on your actual image size */
+    vertical-align: middle;
+}

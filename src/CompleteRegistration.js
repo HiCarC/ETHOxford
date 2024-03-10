@@ -7,6 +7,7 @@ const CompleteRegistration = () => {
     const email = queryParams.get('email');
     const firstNameQuery = queryParams.get('firstName');
     const lastNameQuery = queryParams.get('lastName');
+    const hospital_id = queryParams.get('hospital_id');
 
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -25,7 +26,7 @@ const CompleteRegistration = () => {
         }
 
         try {
-            const response = await fetch('htto://localhost:3001/complete_register', {
+            const response = await fetch('http://localhost:3001/complete-register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -35,7 +36,8 @@ const CompleteRegistration = () => {
                     firstName,
                     lastName,
                     dateOfBirth,
-                    password, // Ensure this is handled securely
+                    password,
+                    hospital_id
                 }),
             });
 

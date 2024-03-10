@@ -3,12 +3,20 @@ import axios from 'axios';
 
 const RegisterPatient = () => {
     const [formData, setFormData] = useState({
+        hospital_id: '', // Ensure you have hospital_id in your initial state
         firstName: '',
         lastName: '',
         email: '',
     });
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+
+    // Example list of hospitals, ideally this would come from your backend
+    const hospitals = [
+        { id: 'dedoctorhospital1', name: 'Hospital One' },
+        { id: 'dedoctorhospital2', name: 'Hospital Two' },
+        { id: 'dedoctorhospital3', name: 'Hospital Three' },
+    ];
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -41,6 +49,23 @@ const RegisterPatient = () => {
     return (
         <form onSubmit={handleSubmit}>
             <h2>Register Patient</h2>
+            <div>
+                <label htmlFor="hospital_id">Hospital ID:</label>
+                <select
+                    id="hospital_id"
+                    name="hospital_id"
+                    value={formData.hospital_id}
+                    onChange={handleChange}
+                    required
+                >
+                    <option value="">Please select a hospital</option>
+                    {hospitals.map((hospital) => (
+                        <option key={hospital.id} value={hospital.id}>
+                            {hospital.name}
+                        </option>
+                    ))}
+                </select>
+            </div>
             <div>
                 <label htmlFor="firstName">First Name:</label>
                 <input

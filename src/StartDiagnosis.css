@@ -1,0 +1,63 @@
+.start-diagnosis {
+    font-family: 'Inter', sans-serif;
+    text-align: center;
+}
+
+.start-diagnosis-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: #F3F4F6; /* Light gray background, adjust as needed */
+}
+
+.start-diagnosis-logo {
+    width: 50px; /* Adjust based on actual logo size */
+}
+
+.start-diagnosis-nav a {
+    text-decoration: none;
+    margin: 0 1rem;
+    color: #000;
+    font-weight: 500;
+}
+
+.sign-out-btn {
+    font-weight: bold;
+    color: #1a73e8; /* Adjust to match the sign out button color */
+}
+
+.start-diagnosis-main {
+    padding: 2rem 0;
+    background-color: #E5E7EB; /* Lighter gray for the main area */
+}
+
+.start-diagnosis-title {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.start-diagnosis-button {
+    background-color: #1a73e8; /* Primary button color */
+    color: #fff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-bottom: 2rem;
+}
+
+.start-diagnosis-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: #F3F4F6; /* Same as header */
+}
+
+.start-diagnosis-made-with img,
+.start-diagnosis-supported-by img {
+    height: 20px; /* Adjust based on your actual image size */
+    vertical-align: middle;
+}
