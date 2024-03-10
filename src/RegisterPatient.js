@@ -24,7 +24,7 @@ const RegisterPatient = () => {
 
         try {
             // Replace 'YOUR_BACKEND_ENDPOINT' with the actual endpoint to your backend
-            await axios.post('YOUR_BACKEND_ENDPOINT/register-patient', formData);
+            await axios.post('http://localhost:3001/register-patient', formData);
             setIsSubmitted(true);
         } catch (error) {
             console.error('Error sending registration data:', error);

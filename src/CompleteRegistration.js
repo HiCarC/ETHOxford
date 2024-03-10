@@ -25,7 +25,7 @@ const CompleteRegistration = () => {
         }
 
         try {
-            const response = await fetch('htto://localhost:3001/create-near-wallet', {
+            const response = await fetch('htto://localhost:3001/complete_register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

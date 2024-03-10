@@ -1,21 +1,19 @@
-
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const NodeRSA = require('node-rsa');
-import { v4 as uuidv4 } from 'uuid';
-
+const crypto = require('crypto');
+const {KeyPair} = require("near-api-js");
+const nodemailer = require('nodemailer');
+const { v4: uuidv4 } = require('uuid');
+const { storeKey, retrieveKey } = require('./mockKeyHolder');
 const app = express();
-app.use(cors()); // Enable CORS
+app.use(cors());
 app.use(bodyParser.json());
 
-function encryptEmailWithPublicKey(email, publicKey) {
-    const key = new NodeRSA(publicKey, 'public');
-    return key.encrypt(email, 'base64');
-}
-
-// Encrypts the private key using the user's password
+// Example: Storing a key for a hospital
+storeKey('hospital-123', 'private-key-for-hospital-123');
+// Encrypts the private key using the user's password and a salt
 function encryptPrivateKey(privateKey, password) {
     const salt = crypto.randomBytes(16);
     const key = crypto.pbkdf2Sync(password, salt, 100000, 32, 'sha512');
@@ -27,117 +25,126 @@ function encryptPrivateKey(privateKey, password) {
 }
 
 const nearConfig = {
-    networkId: process.env.NETWORK_ID, // "testnet"
-    nodeUrl: process.env.NODE_URL, // "https://rpc.testnet.near.org"
-    walletUrl: process.env.WALLET_URL, // "https://wallet.testnet.near.org"
-    helperUrl: process.env.HELPER_URL, // "https://helper.testnet.near.org"
+    networkId: "testnet",
+    nodeUrl: "https://rpc.testnet.near.org",
+    walletUrl: "https://wallet.testnet.near.org",
+    helperUrl: "https://helper.testnet.near.org",
+    explorerUrl: "https://explorer.testnet.near.org",
 };
 
-async function createNearAccount(patientId, hospitalId) {
-    const near = await connect(Object.assign({ deps: { keyStore: new utils.keyStores.InMemoryKeyStore() } }, nearConfig));
-    const masterAccount = await near.account(hospitalId);
-    const newAccountId = `${patientId}.testnet`;
-    const keyPair = KeyPair.fromRandom('ed25519');
+// Convert the private key string to a KeyPair object
 
-    // Add the key pair to the keystore
-    await near.config.keyStore.setKey(nearConfig.networkId, newAccountId, keyPair);
+// Function to create a NEAR account using hospital_id as the master account
+// Example: Creating a patient account using the stored key
 
-    // Assume you have enough NEAR in your master account to cover account creation.
-    // The actual cost depends on the current network requirements.
-    const MINIMUM_BALANCE = "5"; // Example: minimum balance required to create an account, in NEAR tokens.
+// Utility function to convert a private key string into a KeyPair object
+const getKeyPairFromPrivate = (privateKey) => KeyPair.fromString(privateKey);
+
+app.post('/create-patient-account', async (req, res) => {
+    const { patientId, hospitalId } = req.body;
+
     try {
-        const response = await masterAccount.createAccount(
-            newAccountId, // new account name
-            keyPair.publicKey, // public key for the new account
-            utils.format.parseNearAmount(MINIMUM_BALANCE) // initial balance
+        // Use the mock key holder to fetch the hospital's master private key
+        const masterPrivateKey = await retrieveKey(hospitalId);
+        if (!masterPrivateKey) {
+            return res.status(404).json({ error: "Hospital master account not found." });
+        }
+
+        const near = await connect({
+            networkId: nearConfig.networkId,
+            nodeUrl: nearConfig.nodeUrl,
+            walletUrl: nearConfig.walletUrl,
+            helperUrl: nearConfig.helperUrl,
+            keyStore: new utils.keyStores.InMemoryKeyStore(),
+        });
+
+        const masterKeyPair = getKeyPairFromPrivate(masterPrivateKey);
+        const masterAccountId = `${hospitalId}.${nearConfig.networkId}`;
+
+        // Set the master account's key in the key store
+        await near.config.keyStore.setKey(nearConfig.networkId, masterAccountId, masterKeyPair);
+        const masterAccount = await near.account(masterAccountId);
+
+        const newAccountId = `${patientId}.${nearConfig.networkId}`;
+        const newAccountKeyPair = KeyPair.fromRandom('ed25519');
+
+        // Create the new account with an initial balance
+        await masterAccount.createAccount(
+            newAccountId,
+            newAccountKeyPair.publicKey,
+            utils.format.parseNearAmount("10") // Example balance
         );
 
-        console.log("Account creation transaction response:", response);
-
-        // Save the new account details in the "database"
-        usersDb[newAccountId] = {
-            publicKey: keyPair.publicKey.toString(),
-            encryptedPrivateKey: '', // Placeholder, encryption happens later
-            salt: '', // Placeholder
-            iv: '', // Placeholder
-        };
-
-        console.log(`Account ${newAccountId} created and saved.`);
-        return { keyPair, newAccountId };
+        console.log(`Successfully created account: ${newAccountId}`);
+        res.json({ success: true, accountId: newAccountId, publicKey: newAccountKeyPair.publicKey.toString() });
     } catch (error) {
-        console.error("Failed to create account:", error);
-        throw error; // Rethrow or handle as needed
+        console.error(`Failed to create account for ${patientId} with master account ${hospitalId}:`, error);
+        res.status(500).json({ success: false, message: 'Failed to create patient account.' });
     }
-}
+});
 
-const nodemailer = require('nodemailer');
-const {connect, KeyPair} = require("near-api-js");
-const app = express();
-app.use(express.json());
+// Assuming usersDb is defined somewhere accessible
+let usersDb = {};
+
+const transporter = nodemailer.createTransport({
+    host: "mailhog",
+    port: 1025,
+    secure: false, // true for 465, false for other ports. Most local SMTP servers use non-secure connections
+    // No need for auth object since most local SMTP servers don't require authentication
+});
+
+const sendRegistrationEmail = async (email, registrationLink) => {
+    await transporter.sendMail({
+        from: `"Hospital Registration" <"registration@hospital.com">`,
+        to: email,
+        subject: "Complete Your Registration",
+        html: `Please click on the link to complete your registration: <a href="${registrationLink}">Complete Registration</a>`,
+    });
+};
 
 app.post('/register-patient', async (req, res) => {
-    const { firstName, lastName, email } = req.body;
+    const { firstName, lastName, email, hospital_id } = req.body;
+    const registrationLink = `http://localhost:3000/complete-registration?
+    firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}
+    &email=${encodeURIComponent(email)} &hospital_id=${encodeURIComponent(hospital_id)}`;
 
-    const port = 3001;
-
-    // Generate a registration link with user details as query parameters
-    const baseUrl = 'http://localhost:'+port+'/complete-registration';
-    const registrationLink = `${baseUrl}?firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&email=${encodeURIComponent(email)}`;
-
-    let transporter = nodemailer.createTransport({
-        host: 'smtp.mailgun.org',
-        port: 587, // Recommended port for Mailgun
-        secure: false, // true for 465, false for other ports
-        auth: {
-            user: 'postmaster@sandbox9cb27e71b2534fb99fc8064c1bb43292.mailgun.org',
-            pass: '2f65ba9473f03c2bdb344ddbba825321-2c441066-dfa018da'
-        }
-    });
-
-    await transporter.sendMail({
-        from: '"Hospital Registration" <yourhospital@example.com>', // sender address
-        to: email, // recipient
-        subject: "Complete Your Registration", // Subject line
-        html: `Please click on the link to complete your registration: <a href="${registrationLink}">Complete Registration</a>`, // html body
-    });
-
-    res.status(200).send('Registration initiated. Please check your email to complete the registration.');
+    try {
+        await sendRegistrationEmail(email, registrationLink);
+        res.status(200).send('Registration initiated. Please check your email to complete the registration.');
+    } catch (error) {
+        console.error('Failed to send registration email:', error);
+        res.status(500).json({ success: false, message: 'Failed to initiate registration.' });
+    }
 });
 
 app.post('/complete-register', async (req, res) => {
     const { firstName, lastName, email, password } = req.body;
-
-    // Generates the userID by taking a random letter from the first name and the last name, and adding a random number
-    const userId = firstName.charAt(Math.floor(Math.random() * firstName.length)).toLowerCase() +
-        lastName.toLowerCase() + uuidv4().split('-')[0];
+    const userId = `${firstName[0]}${lastName}${uuidv4()}`; // Simplified for uniqueness and readability
 
     try {
-        const keyPair = await createNearAccount(userId);
+        const { accountId, keyPair } = await createNearAccount(userId, hospital_id);
         const { encryptedData, salt, iv } = encryptPrivateKey(keyPair.secretKey, password);
 
-        // Store in mock database
-        usersDb[userId] = {
-            email,
+        usersDb[accountId] = {
             accountData: {
-                accountId: `${userId}.testnet`,
+                accountId,
                 publicKey: keyPair.publicKey.toString(),
                 encryptedPrivateKey: encryptedData,
                 salt,
-                iv
-            }
+                iv,
+            },
         };
 
-        // Here, you'd also send an email to the user to complete their registration, as in your existing code
+        // emails
 
-        res.json({ success: true, message: 'User registered and wallet created.' });
+        res.json({ success: true, message: 'User registration completed successfully.' });
     } catch (error) {
-        console.error('Registration failed:', error);
-        res.status(500).json({ success: false, message: 'Registration failed.' });
+        console.error('Registration completion failed:', error);
+        res.status(500).json({ success: false, message: 'Failed to complete registration.' });
     }
 });
 
-const PORT = port;
+const PORT = 3001;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
-
